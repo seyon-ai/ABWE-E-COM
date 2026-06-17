@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Abuss Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f4f4f6;--bg3:#ebebee;
+  --text:#0a0a0f;--muted:#6b6b80;--border:#e2e2ea;
+  --accent:#5b4cff;--accent2:#7c6fff;--accent-bg:rgba(91,76,255,0.07);
+  --card:#ffffff;--shadow:0 2px 20px rgba(0,0,0,0.07);
+  --xp:#f59e0b;
+}
+[data-theme="dark"]{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;
+  --text:#f0f0fa;--muted:#7070a0;--border:#22222f;
+  --card:#111118;--shadow:0 2px 20px rgba(0,0,0,0.4);
+  --accent-bg:rgba(91,76,255,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;transition:background 0.25s,border-color 0.25s,color 0.15s;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+/* THEME TOGGLE */
+.theme-toggle{position:fixed;top:20px;right:20px;z-index:200;background:var(--bg2);border:1px solid var(--border);border-radius:50px;padding:6px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted);font-weight:500;}
+.theme-toggle:hover{border-color:var(--accent);}
+
+/* LOGIN LAYOUT */
+.login-wrap{flex:1;display:flex;min-height:100vh;}
+.login-left{flex:1;background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;position:relative;overflow:hidden;}
+.login-left::before{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(91,76,255,0.12),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.brand{text-align:center;position:relative;z-index:1;}
+.brand-icon{width:72px;height:72px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 20px;box-shadow:0 8px 32px rgba(91,76,255,0.3);}
+.brand h1{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1;}
+.brand h1 span{color:var(--accent);}
+.brand p{font-size:14px;color:var(--muted);margin-top:8px;line-height:1.6;max-width:300px;}
+.xp-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:50px;padding:6px 14px;font-size:12px;color:var(--xp);font-weight:600;margin-top:20px;}
+
+.login-right{width:440px;display:flex;align-items:center;justify-content:center;padding:40px 48px;}
+@media(max-width:768px){.login-right{width:100%;}.login-left{display:none;}.login-wrap{flex-direction:column;}}
+
+.login-box{width:100%;}
+.login-box h2{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px;}
+.login-box p{font-size:13px;color:var(--muted);margin-bottom:32px;}
+
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.6px;}
+.field input{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
+.field input::placeholder{color:var(--muted);}
+
+.btn-main{width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:-0.3px;}
+.btn-main:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,76,255,0.35);}
+.btn-main:active{transform:translateY(0);}
+
+.msg{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;}
+.msg.error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#ef4444;}
+.msg.success{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:#10b981;}
+
+.hint{text-align:center;margin-top:20px;font-size:12px;color:var(--muted);}
+.hint a{color:var(--accent);text-decoration:none;font-weight:500;}
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="themeIcon">🌙</span><span id="themeLabel">Dark</span>
+</button>
+
+<div class="login-wrap">
+  <div class="login-left">
+    <div class="brand">
+      <div class="brand-icon">🛍️</div>
+      <h1>Abuss<span>Store</span></h1>
+      <p>Spend your hard-earned XP on real rewards — time off, VIP passes, and more.</p>
+      <div class="xp-pill">⚡ XP is your currency</div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-box">
+      <h2>Welcome back</h2>
+      <p>Sign in with your TeamFlow credentials</p>
+      <div class="msg" id="msg"></div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="your_username" autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="btn-main" onclick="doLogin()">Enter Store →</button>
+      <div class="hint">Your account is from <a href="#">TeamFlow</a> — same login</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,collection,query,where,getDocs}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const cfg={apiKey:"AIzaSyBr28yV_-GfkW8R6wasIQNBloCE6B119zk",authDomain:"test-pro-994fa.firebaseapp.com",projectId:"test-pro-994fa",storageBucket:"test-pro-994fa.firebasestorage.app",messagingSenderId:"48550790382",appId:"1:48550790382:web:1bc7ca0c07b433c6a7dfff"};
+const app=initializeApp(cfg);
+const db=getFirestore(app);
+
+// Theme
+const saved=localStorage.getItem('abuss_theme')||'light';
+document.documentElement.setAttribute('data-theme',saved);
+updateThemeBtn(saved);
+window.toggleTheme=function(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('abuss_theme',next);
+  updateThemeBtn(next);
+};
+function updateThemeBtn(t){
+  document.getElementById('themeIcon').textContent=t==='dark'?'☀️':'🌙';
+  document.getElementById('themeLabel').textContent=t==='dark'?'Light':'Dark';
+}
+
+function showMsg(m,t){const el=document.getElementById('msg');el.textContent=m;el.className='msg '+t;el.style.display=m?'block':'none';}
+
+window.doLogin=async function(){
+  const username=document.getElementById('username').value.trim().toLowerCase();
+  const password=document.getElementById('password').value;
+  if(!username||!password){showMsg('Please fill in both fields','error');return;}
+  try{
+    const q=query(collection(db,'users'),where('username','==',username));
+    const snap=await getDocs(q);
+    if(snap.empty){showMsg('Account not found','error');return;}
+    const user=snap.docs[0].data();
+    if(user.password!==password){showMsg('Incorrect password','error');return;}
+    localStorage.setItem('abuss_uid',user.uid);
+    localStorage.setItem('abuss_user',JSON.stringify(user));
+    showMsg('Welcome! Loading store...','success');
+    setTimeout(()=>location.href='store.html',700);
+  }catch(e){showMsg(e.message,'error');}
+};
+
+if(localStorage.getItem('abuss_uid'))location.href='store.html';
+</script>
+</body>
+</html>

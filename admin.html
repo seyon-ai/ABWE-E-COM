@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Abuss Store — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f5f5f8;--bg3:#ebebee;
+  --text:#0a0a0f;--muted:#6b6b80;--border:#e2e2ea;
+  --accent:#5b4cff;--accent2:#7c6fff;--accent-bg:rgba(91,76,255,0.07);
+  --card:#ffffff;--shadow:0 2px 16px rgba(0,0,0,0.06);
+  --xp:#f59e0b;--green:#10b981;--red:#ef4444;--gold:#f59e0b;
+}
+[data-theme="dark"]{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;
+  --text:#f0f0fa;--muted:#6060a0;--border:#22222f;
+  --card:#111118;--shadow:0 2px 20px rgba(0,0,0,0.5);
+  --accent-bg:rgba(91,76,255,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;transition:background 0.25s,border-color 0.2s,color 0.15s;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;width:340px;text-align:center;box-shadow:var(--shadow);}
+.login-card h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;}
+.login-card p{font-size:12px;color:var(--muted);margin-bottom:26px;}
+.field input{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;margin-bottom:12px;}
+.field input:focus{border-color:var(--accent);}
+.field input::placeholder{color:var(--muted);}
+.login-err{color:var(--red);font-size:12px;margin-bottom:10px;display:none;}
+
+/* ADMIN LAYOUT */
+#adminApp{display:none;}
+nav{background:var(--bg);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+.nav-logo span{color:var(--accent);}
+.admin-pill{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red);font-size:10px;padding:3px 10px;border-radius:50px;font-weight:700;margin-left:8px;}
+.nav-right{display:flex;gap:10px;align-items:center;}
+
+.btn{padding:10px 20px;border-radius:10px;border:none;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-primary{background:var(--accent);color:white;}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:8px;}
+.btn-danger{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.btn-danger:hover{background:var(--red);color:white;}
+.btn-success{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.2);}
+.btn-success:hover{background:var(--green);color:white;}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+.main{max-width:1200px;margin:0 auto;padding:28px 24px;}
+
+.tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:28px;overflow-x:auto;}
+.tab{padding:8px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);white-space:nowrap;transition:all 0.2s;}
+.tab:hover{color:var(--text);}
+.tab.active{background:var(--card);color:var(--accent);box-shadow:var(--shadow);border:1px solid var(--border);}
+section{display:none;}section.active{display:block;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr);}}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.stat-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;}
+.stat-label{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.4px;}
+
+/* FORM */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;}
+.card-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:20px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+.form-field{display:flex;flex-direction:column;gap:5px;}
+.form-field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;}
+.form-field input,.form-field select,.form-field textarea{background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--accent);}
+.form-field textarea{resize:vertical;min-height:80px;}
+.form-field select option{background:var(--bg2);}
+.full-col{grid-column:1/-1;}
+
+/* PRODUCTS LIST */
+.prod-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
+.prod-emoji{font-size:30px;}
+.prod-info{flex:1;}
+.prod-name{font-size:14px;font-weight:700;}
+.prod-meta{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap;}
+.prod-price{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--xp);}
+.prod-actions{display:flex;gap:8px;}
+.toggle-pill{padding:4px 12px;border-radius:50px;font-size:10px;font-weight:700;border:none;cursor:pointer;}
+.pill-active{background:rgba(16,185,129,0.12);color:var(--green);border:1px solid rgba(16,185,129,0.25);}
+.pill-inactive{background:var(--bg3);color:var(--muted);border:1px solid var(--border);}
+
+/* PURCHASES TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:10px 14px;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);}
+td{padding:12px 14px;border-bottom:1px solid var(--bg3);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--accent-bg);}
+.badge{padding:4px 10px;border-radius:50px;font-size:10px;font-weight:700;}
+.badge-active{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.2);}
+.badge-expired{background:var(--bg3);color:var(--muted);border:1px solid var(--border);}
+.badge-permanent{background:rgba(91,76,255,0.1);color:var(--accent);border:1px solid rgba(91,76,255,0.2);}
+
+/* USERS */
+.user-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;}
+.user-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.user-info{flex:1;}
+.user-name{font-size:14px;font-weight:700;}
+.user-sub{font-size:11px;color:var(--muted);}
+.user-xp{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--xp);}
+
+/* EMOJI PICKER */
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.ep{font-size:22px;cursor:pointer;padding:4px;border-radius:8px;border:2px solid transparent;transition:all 0.15s;}
+.ep:hover,.ep.sel{border-color:var(--accent);background:var(--accent-bg);}
+
+.msg{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;}
+.msg.error{background:rgba(239,68,68,0.08);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.msg.success{background:rgba(16,185,129,0.08);color:var(--green);border:1px solid rgba(16,185,129,0.2);}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+
+.theme-btn{width:34px;height:34px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div style="font-size:40px;margin-bottom:12px">🔐</div>
+    <h1>Store Admin</h1>
+    <p>Abuss Store management panel</p>
+    <div class="login-err" id="loginErr">Wrong password</div>
+    <div class="field">
+      <input type="password" id="adminPass" placeholder="Admin password" onkeydown="if(event.key==='Enter')checkPass()"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="checkPass()">Unlock →</button>
+    <div style="margin-top:14px"><a href="index.html" style="color:var(--muted);font-size:12px;text-decoration:none">← Back to store</a></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminApp">
+  <nav>
+    <div>
+      <span class="nav-logo">Abuss<span>Store</span></span>
+      <span class="admin-pill">⚡ ADMIN</span>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button class="btn btn-sm btn-ghost" onclick="adminLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('overview')">📊 Overview</div>
+      <div class="tab" onclick="showTab('products')">🛍️ Products</div>
+      <div class="tab" onclick="showTab('purchases')">📋 Purchases</div>
+      <div class="tab" onclick="showTab('members')">👥 Members</div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section id="overview" class="active">
+      <div class="stats">
+        <div class="stat"><div class="stat-val" style="color:var(--accent)" id="ovProducts">0</div><div class="stat-label">Products</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--xp)" id="ovPurchases">0</div><div class="stat-label">Total Purchases</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--green)" id="ovXPSpent">0</div><div class="stat-label">XP Spent Total</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--red)" id="ovMembers">0</div><div class="stat-label">Members</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent Purchases</div>
+        <div id="recentPurchases"><div class="empty">Loading...</div></div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="products">
+      <div class="card">
+        <div class="card-title">Add New Product</div>
+        <div class="msg" id="prodMsg"></div>
+        <div class="form-grid">
+          <div class="form-field full-col">
+            <label>Product Thumbnail (optional)</label>
+            <div id="thumbPreviewWrap" style="display:none;margin-bottom:10px;">
+              <img id="thumbPreview" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;border:1px solid var(--border);"/>
+              <div style="font-size:11px;color:var(--green);margin-top:4px;" id="thumbName"></div>
+            </div>
+            <label style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1.5px dashed var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color 0.2s;" id="thumbLabel" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:22px">🖼️</span>
+              <span style="font-size:13px;color:var(--muted)">Click to upload product image</span>
+              <input type="file" id="thumbFile" accept="image/*" style="display:none" onchange="previewThumb(this)"/>
+            </label>
+          </div>
+          <div class="form-field full-col">
+            <label>Pick Emoji (shows if no thumbnail)</label>
+            <div class="emoji-row" id="emojiPicker"></div>
+            <input type="text" id="prodEmoji" placeholder="Or type emoji..." style="margin-top:8px;width:120px"/>
+          </div>
+          <div class="form-field"><label>Product Name</label><input type="text" id="prodName" placeholder="e.g. 1 Day Leave"/></div>
+          <div class="form-field"><label>Price (XP)</label><input type="number" id="prodPrice" placeholder="e.g. 300" min="1"/></div>
+          <div class="form-field full-col"><label>Description</label><textarea id="prodDesc" placeholder="What does this product give the buyer?"></textarea></div>
+          <div class="form-field"><label>Category</label>
+            <select id="prodCat">
+              <option value="Perks">Perks</option>
+              <option value="VIP">VIP</option>
+              <option value="Time Off">Time Off</option>
+              <option value="Bonus">Bonus</option>
+              <option value="Special">Special</option>
+            </select>
+          </div>
+          <div class="form-field"><label>Badge</label>
+            <select id="prodBadge">
+              <option value="">None</option>
+              <option value="new">🆕 New</option>
+              <option value="hot">🔥 Hot</option>
+              <option value="vip">⭐ VIP</option>
+            </select>
+          </div>
+          <div class="form-field"><label>Validity Type</label>
+            <select id="prodValidType" onchange="updateValidFields()">
+              <option value="permanent">Permanent</option>
+              <option value="days">Days</option>
+              <option value="uses">Number of Uses</option>
+            </select>
+          </div>
+          <div class="form-field" id="validDaysField" style="display:none"><label>Number of Days</label><input type="number" id="prodValidDays" placeholder="e.g. 30" min="1"/></div>
+          <div class="form-field" id="validUsesField" style="display:none"><label>Number of Uses</label><input type="number" id="prodValidUses" placeholder="e.g. 5" min="1"/></div>
+          <div class="form-field"><label>Stock (blank = unlimited)</label><input type="number" id="prodStock" placeholder="Leave blank for unlimited" min="0"/></div>
+        </div>
+        <div style="margin-top:18px">
+          <button class="btn btn-primary" onclick="addProduct()">Add Product →</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">All Products</div>
+        <div id="productsList"><div class="empty">Loading...</div></div>
+      </div>
+    </section>
+
+    <!-- PURCHASES -->
+    <section id="purchases">
+      <div class="card">
+        <div class="card-title">All Purchases</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Member</th><th>Product</th><th>XP</th><th>Purchased</th><th>Validity</th><th>Status</th></tr></thead>
+            <tbody id="purchasesBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMBERS -->
+    <section id="members">
+      <div class="card">
+        <div class="card-title">Members & XP Balances</div>
+        <div id="membersList"><div class="empty">Loading...</div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,doc,query,orderBy,where}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const cfg={apiKey:"AIzaSyBr28yV_-GfkW8R6wasIQNBloCE6B119zk",authDomain:"test-pro-994fa.firebaseapp.com",projectId:"test-pro-994fa",storageBucket:"test-pro-994fa.firebasestorage.app",messagingSenderId:"48550790382",appId:"1:48550790382:web:1bc7ca0c07b433c6a7dfff"};
+const app=initializeApp(cfg);
+const db=getFirestore(app);
+
+const PASS='nastyalalam';
+let selectedEmoji='🎁';
+const IMGBB_KEY='YOUR_IMGBB_API_KEY';
+let thumbFile=null;
+window.previewThumb=function(input){
+  const f=input.files[0];if(!f)return;
+  thumbFile=f;
+  document.getElementById('thumbPreview').src=URL.createObjectURL(f);
+  document.getElementById('thumbPreviewWrap').style.display='block';
+  document.getElementById('thumbName').textContent='📎 '+f.name;
+};
+async function uploadThumb(file){
+  const form=new FormData();form.append('image',file);
+  const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,{method:'POST',body:form});
+  const data=await res.json();
+  if(data.success)return data.data.url;
+  throw new Error('Upload failed');
+}
+
+// Theme
+const t=localStorage.getItem('abuss_theme')||'light';
+document.documentElement.setAttribute('data-theme',t);
+document.getElementById('themeBtn').textContent=t==='dark'?'☀️':'🌙';
+window.toggleTheme=function(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('abuss_theme',next);
+  document.getElementById('themeBtn').textContent=next==='dark'?'☀️':'🌙';
+};
+
+window.checkPass=function(){
+  if(document.getElementById('adminPass').value===PASS){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    sessionStorage.setItem('storeAdmin','1');
+    init();
+  }else{
+    const e=document.getElementById('loginErr');e.style.display='block';
+    setTimeout(()=>e.style.display='none',2000);
+  }
+};
+window.adminLogout=function(){sessionStorage.removeItem('storeAdmin');location.reload();};
+if(sessionStorage.getItem('storeAdmin')==='1'){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('adminApp').style.display='block';
+  setTimeout(init,100);
+}
+
+// Emoji picker
+const EMOJIS=['🎁','🏖️','🌴','👑','💎','🎮','🍕','☕','🎵','🛑','⭐','🚀','🎯','💤','🏆','🎪','🌟','🎉','🔑','💰'];
+const ep=document.getElementById('emojiPicker');
+EMOJIS.forEach(em=>{
+  const d=document.createElement('div');d.className='ep';d.textContent=em;
+  d.onclick=()=>{selectedEmoji=em;document.getElementById('prodEmoji').value=em;document.querySelectorAll('.ep').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');};
+  ep.appendChild(d);
+});
+
+window.updateValidFields=function(){
+  const v=document.getElementById('prodValidType').value;
+  document.getElementById('validDaysField').style.display=v==='days'?'flex':'none';
+  document.getElementById('validUsesField').style.display=v==='uses'?'flex':'none';
+};
+
+function showMsg(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='msg '+type;el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
+
+window.showTab=function(name){
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  const tabs=['overview','products','purchases','members'];
+  document.querySelectorAll('.tab')[tabs.indexOf(name)]?.classList.add('active');
+  if(name==='purchases')loadPurchases();
+  if(name==='members')loadMembers();
+};
+
+async function init(){
+  loadOverview();loadProductsList();
+}
+
+async function loadOverview(){
+  const[pSnap,purchSnap,userSnap]=await Promise.all([getDocs(collection(db,'products')),getDocs(query(collection(db,'purchases'),orderBy('purchasedAt','desc'))),getDocs(collection(db,'users'))]);
+  const prods=pSnap.docs.map(x=>x.data()).filter(x=>x.active!==false);
+  const purchs=purchSnap.docs.map(x=>({id:x.id,...x.data()}));
+  const users=userSnap.docs.map(x=>x.data()).filter(x=>!x.isAdmin);
+  const totalXP=purchs.reduce((s,p)=>s+(p.price||0),0);
+  document.getElementById('ovProducts').textContent=prods.length;
+  document.getElementById('ovPurchases').textContent=purchs.length;
+  document.getElementById('ovXPSpent').textContent=totalXP;
+  document.getElementById('ovMembers').textContent=users.length;
+  const recent=purchs.slice(0,8);
+  document.getElementById('recentPurchases').innerHTML=recent.length?`<table style="width:100%">
+    <thead><tr><th>Member</th><th>Product</th><th>XP</th><th>Date</th></tr></thead>
+    <tbody>${recent.map(p=>`<tr><td>${p.username||p.uid.slice(0,8)}</td><td>${p.productEmoji||''}  ${p.productName}</td><td style="color:var(--xp);font-weight:700">−${p.price}</td><td style="color:var(--muted);font-size:11px">${new Date(p.purchasedAt).toLocaleDateString()}</td></tr>`).join('')}</tbody>
+  </table>`:'<div class="empty">No purchases yet</div>';
+}
+
+async function loadProductsList(){
+  const snap=await getDocs(query(collection(db,'products'),orderBy('createdAt','desc')));
+  const prods=snap.docs.map(x=>({id:x.id,...x.data()}));
+  if(!prods.length){document.getElementById('productsList').innerHTML='<div class="empty">No products yet — add one above!</div>';return;}
+  document.getElementById('productsList').innerHTML=prods.map(p=>{
+    const vLabel=p.validityType==='permanent'?'♾️ Permanent':p.validityType==='days'?`📅 ${p.validityDays} days`:p.validityType==='uses'?`🎯 ${p.validityUses} uses`:'';
+    const stockLabel=p.stock!==undefined?`Stock: ${p.stock}`:'Unlimited';
+    return`<div class="prod-item">
+      <div class="prod-emoji">${p.emoji||'🎁'}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-meta"><span>${p.category||'—'}</span><span>${vLabel}</span><span>${stockLabel}</span>${p.badge?`<span style="color:var(--accent)">${p.badge.toUpperCase()}</span>`:''}</div>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-right:10px">${p.description||''}</div>
+      <div class="prod-price">⚡${p.price}</div>
+      <div class="prod-actions">
+        <button class="toggle-pill ${p.active!==false?'pill-active':'pill-inactive'}" onclick="toggleProduct('${p.id}',${p.active!==false})">${p.active!==false?'Active':'Inactive'}</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.addProduct=async function(){
+  const name=document.getElementById('prodName').value.trim();
+  const price=parseInt(document.getElementById('prodPrice').value);
+  const emoji=document.getElementById('prodEmoji').value||selectedEmoji||'🎁';
+  const desc=document.getElementById('prodDesc').value.trim();
+  const category=document.getElementById('prodCat').value;
+  const badge=document.getElementById('prodBadge').value;
+  const validityType=document.getElementById('prodValidType').value;
+  const validityDays=parseInt(document.getElementById('prodValidDays').value)||null;
+  const validityUses=parseInt(document.getElementById('prodValidUses').value)||null;
+  const stockVal=document.getElementById('prodStock').value;
+  const stock=stockVal?parseInt(stockVal):undefined;
+  if(!name||!price){showMsg('prodMsg','Name and price are required','error');return;}
+  const btn=document.querySelector('[onclick="addProduct()"]');
+  btn.textContent='Uploading...';btn.disabled=true;
+  let thumbnailUrl='';
+  if(thumbFile){
+    try{thumbnailUrl=await uploadThumb(thumbFile);}
+    catch(e){showMsg('prodMsg','Image upload failed — add ImgBB key in admin.html','error');btn.textContent='Add Product →';btn.disabled=false;return;}
+  }
+  const product={name,price,emoji,thumbnailUrl,description:desc,category,badge:badge||null,validityType,validityDays,validityUses,active:true,createdAt:Date.now()};
+  if(stock!==undefined)product.stock=stock;
+  await addDoc(collection(db,'products'),product);
+  showMsg('prodMsg','Product added! ✅','success');
+  ['prodName','prodPrice','prodDesc','prodStock'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('prodEmoji').value='';
+  document.getElementById('thumbPreviewWrap').style.display='none';
+  thumbFile=null;
+  btn.textContent='Add Product →';btn.disabled=false;
+  loadProductsList();loadOverview();
+};
+
+window.toggleProduct=async function(id,currentActive){
+  await updateDoc(doc(db,'products',id),{active:!currentActive});
+  loadProductsList();
+};
+window.deleteProduct=async function(id){
+  if(!confirm('Delete this product?'))return;
+  await deleteDoc(doc(db,'products',id));
+  loadProductsList();loadOverview();
+};
+
+async function loadPurchases(){
+  const snap=await getDocs(query(collection(db,'purchases'),orderBy('purchasedAt','desc')));
+  const purchases=snap.docs.map(x=>({id:x.id,...x.data()}));
+  const now=Date.now();
+  document.getElementById('purchasesBody').innerHTML=purchases.length?purchases.map(p=>{
+    let statusBadge='';
+    if(p.validityType==='permanent')statusBadge='<span class="badge badge-permanent">Permanent</span>';
+    else if(p.validityType==='days'){
+      const expired=p.expiresAt&&now>p.expiresAt;
+      const dLeft=p.expiresAt?Math.ceil((p.expiresAt-now)/86400000):0;
+      statusBadge=expired?'<span class="badge badge-expired">Expired</span>':`<span class="badge badge-active">${dLeft}d left</span>`;
+    }else if(p.validityType==='uses'){
+      statusBadge=(p.usesLeft||0)<=0?'<span class="badge badge-expired">Used up</span>':`<span class="badge badge-active">${p.usesLeft} uses</span>`;
+    }
+    return`<tr>
+      <td><b>${p.username||'—'}</b></td>
+      <td>${p.productEmoji||''} ${p.productName}</td>
+      <td style="color:var(--xp);font-weight:700">−${p.price} XP</td>
+      <td style="font-size:11px;color:var(--muted)">${new Date(p.purchasedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td style="font-size:11px;color:var(--muted)">${p.validityType==='permanent'?'Forever':p.validityType==='days'?p.validityDays+'d':p.validityUses+' uses'}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No purchases yet</td></tr>';
+}
+
+async function loadMembers(){
+  const[userSnap,purchSnap]=await Promise.all([getDocs(collection(db,'users')),getDocs(collection(db,'purchases'))]);
+  const users=userSnap.docs.map(x=>x.data()).filter(x=>!x.isAdmin).sort((a,b)=>(b.score||0)-(a.score||0));
+  const purchases=purchSnap.docs.map(x=>x.data());
+  document.getElementById('membersList').innerHTML=users.length?users.map(u=>{
+    const spent=purchases.filter(p=>p.uid===u.uid).reduce((s,p)=>s+(p.price||0),0);
+    return`<div class="user-row">
+      <div class="user-av">${u.avatar||'😎'}</div>
+      <div class="user-info">
+        <div class="user-name">${u.displayName||u.username}</div>
+        <div class="user-sub">@${u.username} · ${spent} XP spent · ${u.totalSubmissions||0} submissions</div>
+      </div>
+      <div class="user-xp">⚡${u.score||0}</div>
+      <button class="btn btn-sm btn-ghost" onclick="grantXP('${u.uid}','${u.displayName||u.username}',${u.score||0})" style="margin-left:10px">Edit XP</button>
+    </div>`;
+  }).join(''):'<div class="empty">No members found</div>';
+}
+
+window.grantXP=async function(uid,name,current){
+  const val=prompt(`Edit XP for ${name}\nCurrent: ${current} XP\nEnter new XP amount:`);
+  if(val===null)return;
+  const newXP=parseInt(val);
+  if(isNaN(newXP)||newXP<0){alert('Invalid value');return;}
+  await updateDoc(doc(db,'users',uid),{score:newXP});
+  loadMembers();loadOverview();
+};
+</script>
+</body>
+</html>
